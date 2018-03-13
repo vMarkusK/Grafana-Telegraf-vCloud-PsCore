@@ -34,33 +34,47 @@ $Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorizati
 [XML]$orgNetworks = Invoke-RestMethod -uri $Uri -Method Get -Headers $Headers
 #endregion
 
+#region: Get edgeGateway
+$Uri = "https://$VcdHost/api/query?type=edgeGateway"
+$Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorization' = [String]$ResponseHeaders.'x-vcloud-authorization'}
+[XML]$edgeGateways = Invoke-RestMethod -uri $Uri -Method Get -Headers $Headers
+#endregion
+
 #region: Output
 ## Simple Stats
-$vAppsTotal = $vApps.QueryResultRecords.VAppRecord.Count
+$vAppsTotal = ([Array]$vApps.QueryResultRecords.VAppRecord).Count
 $body="vCloudStats vAppCountTotal=$vAppsTotal"
 Write-Host $body
-$VMsTotal = ($VMs.QueryResultRecords.VMRecord | Where-Object {$_.isVAppTemplate -ne "true"}).Count
+$VMsTotal = ([Array]$VMs.QueryResultRecords.VMRecord | Where-Object {$_.isVAppTemplate -ne "true"}).Count
 $body="vCloudStats VMCountTotal=$VMsTotal"
 Write-Host $body
-$VMsPoweredOff = ($VMs.QueryResultRecords.VMRecord | Where-Object {$_.isVAppTemplate -ne "true" -and  $_.status -eq "POWERED_OFF"}).Count
+$VMsPoweredOff = ([Array]$VMs.QueryResultRecords.VMRecord | Where-Object {$_.isVAppTemplate -ne "true" -and  $_.status -eq "POWERED_OFF"}).Count
 $body="vCloudStats VMCountPoweredOff=$VMsPoweredOff"
 Write-Host $body
 $orgNetworksTotal = $orgNetworks.QueryResultRecords.OrgNetworkRecord.Count
 $body="vCloudStats orgNetworkCountTotal=$orgNetworksTotal"
 Write-Host $body
+$edgeGatewaysTotal = ([Array]$edgeGateways.QueryResultRecords.EdgeGatewayRecord).Count
+$body="vCloudStats edgeGatewaysTotal=$edgeGatewaysTotal"
+Write-Host $body
 
 ## vApp Details
-foreach ($item in $vApps.QueryResultRecords.VAppRecord) {
+foreach ($item in [Array]$vApps.QueryResultRecords.VAppRecord) {
     $body = "vCloudStats,vApp=$($item.name),status=$($item.status) numberOfVMs=$($item.numberOfVMs),numberOfCpus=$($item.numberOfCpus),cpuAllocationInMhz=$($item.cpuAllocationInMhz),memoryAllocationMB=$($item.memoryAllocationMB),storageKB=$($item.storageKB)"
         Write-Host $body
 }
 ## orgNetwork Details
-foreach ($item in $orgNetworks.QueryResultRecords.OrgNetworkRecord) {
+foreach ($item in [Array]$orgNetworks.QueryResultRecords.OrgNetworkRecord) {
     $Uri = [string]$item.href + "/allocatedAddresses"
     $Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorization' = [String]$ResponseHeaders.'x-vcloud-authorization'}
     [XML]$orgNetworkAllocated = Invoke-RestMethod -uri $Uri -Method Get -Headers $Headers
     $AllocatedIpAddressesTotal = $orgNetworkAllocated.AllocatedIpAddresses.IpAddress.Count
     $body = "vCloudStats,orgNetwork=$($item.name),gateway=$($item.gateway) AllocatedIpAddressesTotal=$AllocatedIpAddressesTotal"
+        Write-Host $body
+}
+## Edge Details
+foreach ($item in [Array]$edgeGateways.QueryResultRecords.EdgeGatewayRecord) {
+    $body = "vCloudStats,edgeGateway=$($item.name),gatewayStatus=$($item.gatewayStatus),haStatus=$($item.haStatus) numberOfExtNetworks=$($item.numberOfExtNetworks),numberOfOrgNetworks=$($item.numberOfOrgNetworks)"
         Write-Host $body
 }
 #endregion
