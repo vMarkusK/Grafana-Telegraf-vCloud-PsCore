@@ -1,4 +1,4 @@
-$ConfigFile = "./Config.json"
+$ConfigFile = "$PSScriptRoot/Config.json"
 $Configs = Get-Content -Raw -Path $ConfigFile -ErrorAction Continue | ConvertFrom-Json -ErrorAction Continue
 
 if (!($Configs)) {
