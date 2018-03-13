@@ -17,7 +17,7 @@ $Login = Invoke-RestMethod -uri $Uri -Method Post -Headers $Headers -ResponseHea
 #endregion
 
 #region: Cleanup Confidential Data
-Clear-Variable -Name BasicAuth, Authorization
+Clear-Variable -Name BasicAuth, Authorization, Headers
 #endregion
 
 #region: Get vApps
@@ -104,5 +104,5 @@ $Logout = Invoke-RestMethod -uri $Uri -Method Delete -Headers $Headers
 #endregion
 
 #region: Cleanup Confidential Data
-Clear-Variable -Name ResponseHeaders
+Clear-Variable -Name ResponseHeaders, Headers
 #endregion
