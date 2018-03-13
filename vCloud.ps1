@@ -16,6 +16,10 @@ $ResponseHeaders = $null
 $Login = Invoke-RestMethod -uri $Uri -Method Post -Headers $Headers -ResponseHeadersVariable 'ResponseHeaders'
 #endregion
 
+#region: Cleanup Confidential Data
+Clear-Variable -Name BasicAuth, Authorization
+#endregion
+
 #region: Get vApps
 $Uri = "https://$VcdHost/api/query?type=orgVdc"
 $Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorization' = [String]$ResponseHeaders.'x-vcloud-authorization'}
@@ -100,5 +104,5 @@ $Logout = Invoke-RestMethod -uri $Uri -Method Delete -Headers $Headers
 #endregion
 
 #region: Cleanup Confidential Data
-Clear-Variable -Name BasicAuth, VcdHost, Authorization, Login, ResponseHeaders
+Clear-Variable -Name ResponseHeaders
 #endregion
