@@ -1,0 +1,6 @@
+{
+    "Base": {
+            "VcdHost":"<FWDN>",
+            "BasicAuth": "Base64>"
+        }
+    }
