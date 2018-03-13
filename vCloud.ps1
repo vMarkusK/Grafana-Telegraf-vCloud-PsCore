@@ -17,6 +17,12 @@ $Login = Invoke-RestMethod -uri $Uri -Method Post -Headers $Headers -ResponseHea
 #endregion
 
 #region: Get vApps
+$Uri = "https://$VcdHost/api/query?type=orgVdc"
+$Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorization' = [String]$ResponseHeaders.'x-vcloud-authorization'}
+[XML]$orgVdcs = Invoke-RestMethod -uri $Uri -Method Get -Headers $Headers
+#endregion
+
+#region: Get vApps
 $Uri = "https://$VcdHost/api/query?type=vApp"
 $Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorization' = [String]$ResponseHeaders.'x-vcloud-authorization'}
 [XML]$vApps = Invoke-RestMethod -uri $Uri -Method Get -Headers $Headers
@@ -42,6 +48,9 @@ $Headers =  @{'accept' = 'application/*+xml;version=27.0'; 'x-vcloud-authorizati
 
 #region: Output
 ## Simple Stats
+$orgVdcsTotal = ([Array]$orgVdcs.QueryResultRecords.OrgVdcRecord).Count
+$body="vCloudStats orgVdcCountTotal=$orgVdcsTotal"
+Write-Host $body
 $vAppsTotal = ([Array]$vApps.QueryResultRecords.VAppRecord).Count
 $body="vCloudStats vAppCountTotal=$vAppsTotal"
 Write-Host $body
@@ -58,6 +67,11 @@ $edgeGatewaysTotal = ([Array]$edgeGateways.QueryResultRecords.EdgeGatewayRecord)
 $body="vCloudStats edgeGatewaysTotal=$edgeGatewaysTotal"
 Write-Host $body
 
+## OrgVdc Details
+foreach ($item in [Array]$orgVdcs.QueryResultRecords.OrgVdcRecord) {
+    $body = "vCloudStats,orgVdc=$($item.name),isEnabled=$($item.isEnabled) cpuUsedMhz=$($item.cpuUsedMhz),memoryUsedMB=$($item.memoryUsedMB),numberOfMedia=$($item.numberOfMedia),numberOfVAppTemplates=$($item.numberOfVAppTemplates),numberOfVApps=$($item.numberOfVApps),storageUsedMB=$($item.storageUsedMB)"
+        Write-Host $body
+}
 ## vApp Details
 foreach ($item in [Array]$vApps.QueryResultRecords.VAppRecord) {
     $body = "vCloudStats,vApp=$($item.name),status=$($item.status) numberOfVMs=$($item.numberOfVMs),numberOfCpus=$($item.numberOfCpus),cpuAllocationInMhz=$($item.cpuAllocationInMhz),memoryAllocationMB=$($item.memoryAllocationMB),storageKB=$($item.storageKB)"
