@@ -13,7 +13,13 @@ $Uri = "https://$VcdHost/api/sessions"
 $Authorization = 'Basic {0}' -f $BasicAuth
 $Headers =  @{'accept' = 'application/vnd.vmware.vcloud.session+xml;version=27.0'; 'Authorization' = $Authorization}
 $ResponseHeaders = $null
-$Login = Invoke-RestMethod -uri $Uri -Method Post -Headers $Headers -ResponseHeadersVariable 'ResponseHeaders'
+try {
+    $Login = Invoke-RestMethod -uri $Uri -Method Post -Headers $Headers -ResponseHeadersVariable 'ResponseHeaders'
+}
+catch {
+    Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__ 
+    Exit
+}
 #endregion
 
 #region: Cleanup Confidential Data
